@@ -80,7 +80,18 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = $request->all();
+        try {
+            $user = User::findOrFail($id);
+            $user->update($data);
+
+        } catch (\Exception $e) {
+            return [
+                'status' => 400,
+                'menssagem' => 'Erro ao atualizar usuário!!',
+                'error' => $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -88,6 +99,16 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+        } catch (\Exception $e) {
+            return [
+                'status' => 400,
+                'menssagem' => 'Erro ao deletar usuário!!',
+                'error' => $e->getMessage()
+            ];
+        }
     }
 }
