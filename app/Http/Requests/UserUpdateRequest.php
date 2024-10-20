@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-class UserCreateRequest extends FormRequest
+class UserUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,20 +22,23 @@ class UserCreateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('id');  // Captura o ID do usuário da rota
+
         return [
-            'name' => 'required|string|max:50',
-            'email' => 'required|string|email|max:255|unique:users',
+            'name' => 'sometimes|string|max:50',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $userId,
             'password' => [
-                'required',
+                'sometimes',
                 'string',
                 'confirmed',
                 Password::min(8)
                     ->letters()
                     ->mixedCase()
                     ->numbers()
-                    ->symbols(),
+                    ->symbols()
+                    ->uncompromised(),
             ],
-            'password_confirmation' => 'required|same:password'
+            'password_confirmation' => 'sometimes|same:password'
         ];
     }
 
@@ -50,10 +53,10 @@ class UserCreateRequest extends FormRequest
             'confirmed' => 'O campo :attribute não confere.',
             'same' => 'Os campos confirmação da senha e senha devem corresponder.',
             'min' => 'O campo :attribute deve ter no mínimo :min caracteres.',
-            'password.letters' => 'O campo :attribute deve conter ao menos uma letra.',
-            'password.mixed' => 'O campo :attribute deve conter ao menos uma letra maiúscula e uma letra minúscula.',
-            'password.symbols' => 'O campo :attribute deve conter ao menos um simbolo.',
-            'password.numbers' => 'O campo :attribute deve conter ao menos um número.'
+            'letters' => 'O campo :attribute deve conter ao menos uma letra.',
+            'mixedCase' => 'O campo :attribute deve conter ao menos uma letra maiúscula e uma letra minúscula.',
+            'symbols' => 'O campo :attribute deve conter ao menos um simbolo.',
+            'numbers' => 'O campo :attribute deve conter ao menos um número.'
         ];
     }
 }

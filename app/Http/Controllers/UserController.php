@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UserCreateRequest;
+use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class UserController
  *
  * @package App\Http\Controllers
- * @author Vinícius Sarmento
+ * @author Vinícius Siqueira
  * @link https://github.com/ViniciusSCS
  * @date 2024-08-23 21:48:54
  * @copyright UniEVANGÉLICA
@@ -22,7 +24,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = User::select('id', 'name', 'email')->paginate('2');
+        $user = User::select('id', 'name', 'email', 'created_at')
+            ->paginate('10');
 
         return [
             'status' => 200,
@@ -34,9 +37,15 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function me()
     {
+        $user = Auth::user();
 
+        return [
+            'status' => 200,
+            'message' => 'Usuário logado!',
+            "usuario" => $user
+        ];
     }
 
     /**
@@ -64,7 +73,21 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::find($id);
+
+        if(!$user){
+            return [
+                'status' => 404,
+                'message' => 'Usuário não encontrado! Que triste!',
+                'user' => $user
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'message' => 'Usuário encontrado com sucesso!!',
+            'user' => $user
+        ];
     }
 
     /**
@@ -78,9 +101,32 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserUpdateRequest $request, string $id)
     {
-        //
+        $data = $request->all();
+
+        $user = User::find($id);
+
+        if(!$user){
+            return [
+                'status' => 404,
+                'message' => 'Usuário não encontrado! Que triste!',
+                'user' => $user
+            ];
+        }
+
+        // Verifica se a senha está presente nos dados da requisição
+        if (isset($data['password'])) {
+            $data['password'] = bcrypt($data['password']);  // Criptografa a senha antes de salvar
+        }
+
+        $user->update($data);
+
+        return [
+            'status' => 200,
+            'message' => 'Usuário atualizado com sucesso!!',
+            'user' => $user
+        ];
     }
 
     /**
@@ -88,6 +134,22 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::find($id);
+
+        if(!$user){
+            return [
+                'status' => 404,
+                'message' => 'Usuário não encontrado! Que triste!',
+                'user' => $user
+            ];
+        }
+
+        $user->delete($id);
+
+        return [
+            'status' => 200,
+            'message' => 'Usuário deletado com sucesso!!'
+        ];
+
     }
 }
