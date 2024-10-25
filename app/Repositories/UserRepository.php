@@ -9,7 +9,7 @@ class UserRepository implements UserRepositoryInterface
 {
     public function all(int $paginate = 10)
     {
-        return User::select('id', 'name', 'email', 'created_at')->paginate($paginate);
+        return User::select('id', 'name', 'email')->paginate($paginate);
     }
 
     public function findById(string $id): ?User

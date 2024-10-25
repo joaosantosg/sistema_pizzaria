@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Repositories\Contracts\FlavorRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\FlavorRepository;
+use App\Repositories\UserRepository;
 use App\Services\Contracts\FlavorServiceInterface;
 use App\Services\Contracts\UserServiceInterface;
 use App\Services\FlavorService;
@@ -18,7 +22,10 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(UserServiceInterface::class, UserService::class);
+        $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(FlavorServiceInterface::class, FlavorService::class);
+        $this->app->bind(FlavorRepositoryInterface::class, FlavorRepository::class);
+
     }
 
     /**

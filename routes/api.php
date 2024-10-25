@@ -7,14 +7,20 @@ use App\Http\Controllers\{
 };
 use Illuminate\Support\Facades\Route;
 
-Route::post('/login', [AuthController::class, 'login']);
+// Rotas de autenticação
+Route::prefix('/auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
+});
+
+// Rotas para cadastro de usuários
 Route::post('/cadastrar', [UserController::class, 'store']);
 
-//Regra autenticar e autorizar os acessos
+// Agrupamento de rotas protegidas por autenticação
 Route::middleware('auth:api')->group(function () {
-    Route::post('/logout',[AuthController::class, 'logout']);
 
-    Route::prefix('/user')->group(function (){
+    // Grupo de rotas para usuários
+    Route::prefix('/user')->group(function () {
         Route::get('/', [UserController::class, 'me']);
         Route::get('/listar', [UserController::class, 'index']);
         Route::put('/atualizar/{id}', [UserController::class, 'update']);
@@ -22,7 +28,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/visualizar/{id}', [UserController::class, 'show']);
     });
 
-    Route::prefix('/sabor')->group(function (){
+    // Grupo de rotas para sabores
+    Route::prefix('/sabor')->group(function () {
         Route::post('/', [FlavorController::class, 'store']);
         Route::get('/', [FlavorController::class, 'index']);
         Route::put('/atualizar/{id}', [FlavorController::class, 'update']);
