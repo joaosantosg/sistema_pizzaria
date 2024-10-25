@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\UserServiceInterface;
 use App\Http\Requests\UserCreateRequest;
 use App\Http\Requests\UserUpdateRequest;
+use App\Services\Contracts\UserServiceInterface;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller

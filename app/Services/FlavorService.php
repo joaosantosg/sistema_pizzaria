@@ -2,48 +2,52 @@
 
 namespace App\Services;
 
-use App\Contracts\FlavorServiceInterface;
 use App\Http\Enums\TamanhoEnum;
-use App\Models\Flavor;
+use App\Services\Contracts\FlavorServiceInterface;
+use App\Repositories\Contracts\FlavorRepositoryInterface;
 
 class FlavorService implements FlavorServiceInterface
 {
+    protected $flavorRepository;
+
+    public function __construct(FlavorRepositoryInterface $flavorRepository)
+    {
+        $this->flavorRepository = $flavorRepository;
+    }
+
     public function getAllFlavors()
     {
-        return Flavor::select('id', 'sabor', 'preco', 'tamanho')->paginate(10);
+        return $this->flavorRepository->all(10);
     }
 
     public function getFlavorById(string $id)
     {
-        return Flavor::find($id);
+        return $this->flavorRepository->findById($id);
     }
 
     public function createFlavor(array $data)
     {
-        return Flavor::create([
-            'sabor' => $data['sabor'],
-            'preco' => $data['preco'],
-            'tamanho' => TamanhoEnum::from($data['tamanho']),
-        ]);
+        $data['tamanho'] = TamanhoEnum::from($data['tamanho']);
+        return $this->flavorRepository->create($data);
     }
 
     public function updateFlavor(string $id, array $data)
     {
-        $flavor = $this->getFlavorById($id);
+        if (isset($data['tamanho'])) {
+            $data['tamanho'] = TamanhoEnum::from($data['tamanho']);
+        }
+
+        $flavor = $this->flavorRepository->findById($id);
         if ($flavor) {
-            $flavor->update($data);
+            $this->flavorRepository->update($id, $data);
             return $flavor;
         }
+
         return null;
     }
 
     public function deleteFlavor(string $id)
     {
-        $flavor = $this->getFlavorById($id);
-        if ($flavor) {
-            $flavor->delete();
-            return true;
-        }
-        return false;
+        return $this->flavorRepository->delete($id);
     }
 }

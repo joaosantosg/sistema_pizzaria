@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\FlavorServiceInterface;
 use App\Http\Requests\FlavorCreatRequest;
+use App\Services\Contracts\FlavorServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

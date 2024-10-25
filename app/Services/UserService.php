@@ -2,15 +2,22 @@
 
 namespace App\Services;
 
-use App\Contracts\UserServiceInterface;
-use App\Models\User;
+use App\Services\Contracts\UserServiceInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 
 class UserService implements UserServiceInterface
 {
+    protected $userRepository;
+
+    public function __construct(UserRepositoryInterface $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
     public function getAllUsers()
     {
-        return User::select('id', 'name', 'email', 'created_at')->paginate(10);
+        return $this->userRepository->all(10);
     }
 
     public function getCurrentUser()
@@ -20,38 +27,31 @@ class UserService implements UserServiceInterface
 
     public function getUserById(string $id)
     {
-        return User::find($id);
+        return $this->userRepository->findById($id);
     }
 
     public function createUser(array $data)
     {
-        return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => bcrypt($data['password']),
-        ]);
+        return $this->userRepository->create($data);
     }
 
     public function updateUser(string $id, array $data)
     {
-        $user = $this->getUserById($id);
+        if (isset($data['password'])) {
+            $data['password'] = bcrypt($data['password']);
+        }
+
+        $user = $this->userRepository->findById($id);
         if ($user) {
-            if (isset($data['password'])) {
-                $data['password'] = bcrypt($data['password']);
-            }
-            $user->update($data);
+            $this->userRepository->update($id, $data);
             return $user;
         }
+
         return null;
     }
 
     public function deleteUser(string $id)
     {
-        $user = $this->getUserById($id);
-        if ($user) {
-            $user->delete();
-            return true;
-        }
-        return false;
+        return $this->userRepository->delete($id);
     }
 }

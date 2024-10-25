@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Contracts\FlavorServiceInterface;
-use App\Contracts\UserServiceInterface;
+use App\Services\Contracts\FlavorServiceInterface;
+use App\Services\Contracts\UserServiceInterface;
 use App\Services\FlavorService;
 use App\Services\UserService;
 use Carbon\Carbon;
