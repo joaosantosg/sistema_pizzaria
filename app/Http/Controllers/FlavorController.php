@@ -2,128 +2,90 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Enums\TamanhoEnum;
-use App\Models\Flavor;
-use App\Http\Requests\{
-    FlavorCreatRequest
-};
+use App\Contracts\FlavorServiceInterface;
+use App\Http\Requests\FlavorCreatRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * Class FlavorController
- *
- * @package App\Http\Controllers
- * @author Vinícius Siqueira
- * @link https://github.com/ViniciusSCS
- * @date 2024-10-01 15:52:04
- * @copyright UniEVANGÉLICA
- */
 class FlavorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        $flavors = Flavor::select('id', 'sabor', 'preco', 'tamanho')
-            ->paginate('10');
+    protected FlavorServiceInterface $flavorService;
 
-        return [
-            'status' => 200,
-            'message' => 'Sabores encontrados!!',
-            'sabores' => $flavors
-        ];
+    public function __construct(FlavorServiceInterface $flavorService)
+    {
+        $this->flavorService = $flavorService;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(FlavorCreatRequest $request)
+    public function index(): JsonResponse
     {
-        $data = $request->all();
+        $flavors = $this->flavorService->getAllFlavors();
 
-        $flavor = Flavor::create([
-            'sabor' => $data['sabor'],
-            'preco' => $data['preco'],
-            'tamanho' => TamanhoEnum::from($data['tamanho']),
+        return response()->json([
+            'status' => 200,
+            'message' => 'Sabores encontrados!',
+            'sabores' => $flavors,
         ]);
-
-        return [
-            'status' => 200,
-            'message' => 'Sabor cadastrado com sucesso!!',
-            'sabor' => $flavor
-        ];
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function store(FlavorCreatRequest $request): JsonResponse
     {
-        $flavor = Flavor::find($id);
+        $flavor = $this->flavorService->createFlavor($request->all());
 
-        if(!$flavor){
-            return [
-                'status' => 404,
-                'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
-        }
-
-        return [
+        return response()->json([
             'status' => 200,
-            'message' => 'Sabor encontrado com sucesso!!',
-            'user' => $flavor
-        ];
+            'message' => 'Sabor cadastrado com sucesso!',
+            'sabor' => $flavor,
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function show(string $id): JsonResponse
     {
-        $data = $request->all();
+        $flavor = $this->flavorService->getFlavorById($id);
 
-        $flavor = Flavor::find($id);
-
-        if(!$flavor){
-            return [
+        if (!$flavor) {
+            return response()->json([
                 'status' => 404,
                 'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
+            ]);
         }
 
-        $flavor->update($data);
-
-        return [
+        return response()->json([
             'status' => 200,
-            'message' => 'Sabor atualizado com sucesso!!',
-            'user' => $flavor
-        ];
+            'message' => 'Sabor encontrado com sucesso!',
+            'sabor' => $flavor,
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function update(Request $request, string $id): JsonResponse
     {
-        $flavor = Flavor::find($id);
+        $flavor = $this->flavorService->updateFlavor($id, $request->all());
 
-        if(!$flavor){
-            return [
+        if (!$flavor) {
+            return response()->json([
                 'status' => 404,
                 'message' => 'Sabor não encontrado! Que triste!',
-                'user' => $flavor
-            ];
+            ]);
         }
 
-        $flavor->delete($id);
-
-        return [
+        return response()->json([
             'status' => 200,
-            'message' => 'Sabor deletado com sucesso!!'
-        ];
+            'message' => 'Sabor atualizado com sucesso!',
+            'sabor' => $flavor,
+        ]);
+    }
 
+    public function destroy(string $id): JsonResponse
+    {
+        if ($this->flavorService->deleteFlavor($id)) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Sabor deletado com sucesso!',
+            ]);
+        }
+
+        return response()->json([
+            'status' => 404,
+            'message' => 'Sabor não encontrado! Que triste!',
+        ]);
     }
 }
